@@ -28,7 +28,11 @@ class Contract:
 
     def deployContract(self):
         # form tx
-        construct_txn = self.contract.constructor().buildTransaction({
+        construct_txn = self.contract.constructor(
+                'smn locker',
+                '0x554622209Ee05E8871dbE1Ac94d21d30B61013c2',
+                '0x18089Cb45906F19889c44c23A86b96062C245865',
+                1566403200).buildTransaction({
             'from': self.acct.address,
             'nonce': self.w3.eth.getTransactionCount(self.acct.address),
             'gas': 1728712,
@@ -79,10 +83,16 @@ class Contract:
         secondsRemaining = contractOnline.functions.secondsRemaining().call()
         tokenLocked = contractOnline.functions.tokenLocked().call()
         print(
+            'name: {}\n'
+            'beneficiary: {}\n'
+            'token: {}\n'
             'releaseTimestamp: {} {}\n'
             'currentTimestamp: {} {}\n'
             'secondsRemaining: {} {} days\n'
             'tokenLocked     : {}\n'.format(
+            contractOnline.functions.name().call(),
+            contractOnline.functions.beneficiary().call(),
+            contractOnline.functions.token().call(),
             releaseTimestamp, ethtools.timestampToDate(releaseTimestamp),
             currentTimestamp, ethtools.timestampToDate(currentTimestamp),
             secondsRemaining, secondsRemaining/3600/24,
@@ -96,26 +106,29 @@ class Contract:
 
 if __name__ == '__main__':
     # deploy Token
-    tokenkeyfile = 'accounts/0x5b21AA23A11c03b6C35A26722a8D3912C88E9c28_0x1d3f95f41e95d1f2de8e437eeb7dbb408cd4d77b2d9e92feeb1b0e9b7f777ae3.json'
-    tokensourcefile = '../../../contracts/WaltonToken.sol'
+    #tokenkeyfile = 'accounts/0x5b21AA23A11c03b6C35A26722a8D3912C88E9c28_0x1d3f95f41e95d1f2de8e437eeb7dbb408cd4d77b2d9e92feeb1b0e9b7f777ae3.json'
+    #tokensourcefile = 'contracts/WaltonToken.sol'
 
     # deploy locker
     lockerkeyfile = 'accounts/0x18089Cb45906F19889c44c23A86b96062C245865_0xf9d8f69a65a8ede8bb26db426713eec920f73ba1e88e0a5902929c0ed140f198.json'
-    lockersourcefile = '../../../contracts/locker/smnlocker/smn_2018-08-22_0x18089Cb45906F19889c44c23A86b96062C245865_Tom.sol'
+    lockersourcefile = 'contracts/WaltonTokenLocker.sol'
 
     # Token
-    token = '0x554622209Ee05E8871dbE1Ac94d21d30B61013c2'
-    locker = '0xAbb11084F2657d19B730A33c08bFE1ae5C5E3C2C'
+    #token = '0x554622209Ee05E8871dbE1Ac94d21d30B61013c2'
+    #locker = '0xAbb11084F2657d19B730A33c08bFE1ae5C5E3C2C'
+    locker = '0x8bB7aA9A9c21fDCBC029db8469dd2d7b3Aed61a1'
 
-    tokencont = Contract(tokenkeyfile, tokensourcefile)
+    #tokencont = Contract(tokenkeyfile, tokensourcefile)
     lockercont = Contract(lockerkeyfile, lockersourcefile)
 
 
     #tokencont.deployContract()
-    #lockercont.deployContract()
-    tokencont.sendToken(token, locker, 5000*10**18)
-    tokencont.showTokenContract(token)
+    tx_receipt = lockercont.deployContract()
+    locker = tx_receipt.get('contractAddress')
+    print('locker is : ', locker)
+    #tokencont.sendToken(token, locker, 5000*10**18)
+    #tokencont.showTokenContract(token)
     lockercont.showLockerContract(locker)
-    tokencont.balanceOf(token, '0x5b21AA23A11c03b6C35A26722a8D3912C88E9c28')
+    #tokencont.balanceOf(token, '0x5b21AA23A11c03b6C35A26722a8D3912C88E9c28')
 
 
